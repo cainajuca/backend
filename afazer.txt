@@ -1,0 +1,2 @@
+acertar o catch do post authenticate em authController
+    por ora ta com erro do faustao
