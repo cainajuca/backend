@@ -1,4 +1,6 @@
 const express = require('express');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const User = require('../models/user.js');
 
@@ -23,6 +25,38 @@ router.post('/register', async (req, res) => {
         return res.status(400).send({ error: 'Registration failed' });
     }
 });
+
+
+router.post('/authenticate', async (req, res) => {
+    try{
+        const { email, password } = req.body;
+
+        const user = await User.findOne({ email }).select('+password');
+
+        if(!user)
+            return res.status(400).send({ error: 'User not found.' });
+
+        // compara senhas criptografadas
+        if(!await bcrypt.compare(password, user.password))
+            return res.status(400).send({ error: 'Invalid password.' })
+
+        // prevent the password to come back in response
+        user.password = undefined;
+
+        const token = jwt.sign({ id: user.id }, {  });
+
+        res.send({ user });
+
+    } catch(err) {
+
+        // acertar isso depois
+
+        console.log('erou:');
+        console.log(err);
+        return res.status(400).send({ error: 'Eroou' });
+    }
+});
+
 
 // repassa router para o app com o prefixo /auth
 // tds as rotas definidas acima serao entao prefixadas com /auth
